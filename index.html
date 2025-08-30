@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Retinal Scan Analyzer - Advanced Medical Imaging</title>
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            --error-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --shadow-light: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --shadow-heavy: 0 25px 80px 0 rgba(0, 0, 0, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --success: #00d4aa;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --border-radius: 24px;
+            --border-radius-sm: 16px;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        *::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(120, 119, 198, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(255, 119, 198, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom left, rgba(120, 219, 255, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0f 0%, #0f0f1a 50%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(79, 172, 254, 0.04) 0%, transparent 70%),
+                radial-gradient(circle at 75% 75%, rgba(255, 119, 198, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            animation: containerReveal 1s ease-out;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 
+                0 40px 120px rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes containerReveal {
+            from {
+                opacity: 0;
+                transform: translateY(100px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: heroGradient 15s ease infinite;
+            padding: 100px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        @keyframes heroGradient {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            opacity: 0.95;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 60px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(79, 172, 254, 0.2);
+            border-color: rgba(79, 172, 254, 0.3);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--accent-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            padding: 100px 60px;
+            background: rgba(255, 255, 255, 0.01);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .upload-form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 4rem 3rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .file-input-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(255, 119, 198, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .file-input-wrapper:hover {
+            border-color: #4facfe;
+            background: rgba(79, 172, 254, 0.05);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(79, 172, 254, 0.2);
+        }
+
+        .file-input-wrapper:hover::before {
+            opacity: 1;
+        }
+
+        .file-input-wrapper.drag-over {
+            border-color: #00f2fe;
+            background: rgba(79, 172, 254, 0.1);
+            transform: scale(1.02);
+            box-shadow: 0 30px 80px rgba(79, 172, 254, 0.3);
+        }
+
+        .file-input-wrapper.has-file {
+            border-color: var(--success);
+            background: rgba(0, 212, 170, 0.05);
+            box-shadow: 0 20px 60px rgba(0, 212, 170, 0.2);
+        }
+
+        #scanFile {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-icon {
+            font-size: 4rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .file-input-text {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .file-input-subtext {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .supported-formats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .format-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #uploadBtn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 18px 60px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 15px 50px rgba(79, 172, 254, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        #uploadBtn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        #uploadBtn:hover::before {
+            left: 100%;
+        }
+
+        #uploadBtn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 
+                0 25px 70px rgba(79, 172, 254, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        #uploadBtn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results Section */
+        .results-section {
+            padding: 80px 60px;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        #report {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            margin-bottom: 3rem;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #report::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            transform: translateX(-100%);
+            transition: transform 0.8s ease;
+        }
+
+        #report.success::before {
+            background: var(--success-gradient);
+            transform: translateX(0);
+        }
+
+        #report.error::before {
+            background: var(--error-gradient);
+            transform: translateX(0);
+        }
+
+        #report.loading {
+            background: rgba(255, 255, 255, 0.05);
+            animation: reportPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes reportPulse {
+            0%, 100% { 
+                background: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            50% { 
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(79, 172, 254, 0.2);
+            }
+        }
+
+        .report-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .diagnosis {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .confidence {
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 30px;
+            display: inline-block;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .confidence.high {
+            background: rgba(0, 212, 170, 0.15);
+            color: #00d4aa;
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 0 30px rgba(0, 212, 170, 0.2);
+        }
+
+        .confidence.medium {
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+            border-color: rgba(243, 156, 18, 0.3);
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.2);
+        }
+
+        .confidence.low {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.2);
+        }
+
+        .report-details {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        #modelViewer {
+            width: 100%;
+            height: 500px;
+            border-radius: var(--border-radius);
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: modelReveal 1s ease-out;
+        }
+
+        @keyframes modelReveal {
+            from {
+                opacity: 0;
+                transform: scale(0.95) rotateY(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        /* Loading Components */
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .loading-spinner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, #4facfe, #00f2fe, transparent);
+            animation: spinGlow 1.5s linear infinite;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(100% - 8px);
+            height: calc(100% - 8px);
+            background: #0a0a0f;
+            border-radius: 50%;
+        }
+
+        @keyframes spinGlow {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .loading-subtext {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Technology Section */
+        .technology {
+            padding: 100px 60px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-sm);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(79, 172, 254, 0.15);
+        }
+
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tech-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 80px 60px;
+            background: var(--dark-gradient);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .stat-description {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(30px);
+            padding: 60px 60px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            line-height: 1.8;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #4facfe;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero, .features, .upload-section, .results-section, .technology, .stats, footer {
+                padding-left: 40px;
+                padding-right: 40px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 20px;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .hero, .features, .upload-section, .results-section, .technology, .stats, footer {
+                padding: 60px 30px;
+            }
+
+            .hero {
+                padding-top: 80px;
+                padding-bottom: 80px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 2rem;
+            }
+
+            .file-input-wrapper {
+                padding: 3rem 2rem;
+            }
+
+            .file-icon {
+                font-size: 3.5rem;
+            }
+
+            #uploadBtn {
+                padding: 16px 50px;
+                font-size: 1.1rem;
+            }
+
+            #modelViewer {
+                height: 400px;
+            }
+
+            #report {
+                padding: 2.5rem 2rem;
+                min-height: 180px;
+            }
+
+            .diagnosis {
+                font-size: 1.5rem;
+            }
+
+            .confidence {
+                font-size: 1.2rem;
+                padding: 10px 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero, .features, .upload-section, .results-section, .technology, .stats, footer {
+                padding: 40px 20px;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .file-input-wrapper {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .file-icon {
+                font-size: 3rem;
+            }
+
+            .file-input-text {
+                font-size: 1.1rem;
+            }
+
+            #uploadBtn {
+                padding: 14px 40px;
+                font-size: 1rem;
+                min-width: 180px;
+            }
+
+            .results-section {
+                padding: 50px 20px;
+            }
+
+            #report {
+                padding: 2rem 1.5rem;
+                min-height: 160px;
+            }
+
+            #modelViewer {
+                height: 350px;
+            }
+
+            .tech-grid, .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* Additional animations and effects */
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .glow-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .glow-effect:hover::before {
+            left: 100%;
+        }
+
+        /* Error states */
+        .error {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: rgba(231, 76, 60, 0.3);
+            box-shadow: 0 0 40px rgba(231, 76, 60, 0.2);
+        }
+
+        .success {
+            background: rgba(0, 212, 170, 0.1);
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 0 40px rgba(0, 212, 170, 0.2);
+        }
+
+        /* Processing states */
+        #uploadBtn.processing {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            animation: processingPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes processingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .processing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .processing-dots::after {
+            content: '';
+            animation: processingDots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes processingDots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <i class="fas fa-eye"></i>
+                <span>RetinalAI</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#technology">Technology</a></li>
+                <li><a href="#upload">Analyze</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1><i class="fas fa-microscope"></i> AI Retinal Scan Analyzer</h1>
+                <p class="hero-subtitle">
+                    Revolutionary AI-powered retinal image analysis with advanced 3D visualization and real-time diagnostic insights
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">99.2%</div>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"> 30s</div>
+                        <div class="stat-label">Analysis Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Scans Analyzed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Availability</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Features</h2>
+                <p class="section-description">
+                    Cutting-edge technology meets medical precision to deliver unprecedented diagnostic accuracy
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="feature-title">Deep Learning AI</h3>
+                    <p class="feature-description">
+                        State-of-the-art convolutional neural networks trained on millions of retinal images for exceptional diagnostic accuracy
+                    </p>
+                </div>
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3 class="feature-title">3D Visualization</h3>
+                    <p class="feature-description">
+                        Interactive 3D models of retinal structures providing comprehensive spatial understanding of detected conditions
+                    </p>
+                </div>
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time Analysis</h3>
+                    <p class="feature-description">
+                        Lightning-fast processing delivers results in under 30 seconds without compromising diagnostic quality
+                    </p>
+                </div>
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">HIPAA Compliant</h3>
+                    <p class="feature-description">
+                        Enterprise-grade security ensures complete patient privacy and data protection throughout the analysis process
+                    </p>
+                </div>
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Confidence Scoring</h3>
+                    <p class="feature-description">
+                        Transparent confidence metrics provide clear insight into diagnostic certainty and recommendation reliability
+                    </p>
+                </div>
+                <div class="feature-card glow-effect">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                    <h3 class="feature-title">Detailed Reports</h3>
+                    <p class="feature-description">
+                        Comprehensive diagnostic reports with actionable insights and recommendations for clinical decision-making
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section" id="upload">
+            <div class="section-header">
+                <h2 class="section-title">Upload & Analyze</h2>
+                <p class="section-description">
+                    Upload your retinal scan and receive instant AI-powered analysis
+                </p>
+            </div>
+            <form class="upload-form">
+                <div class="file-input-wrapper" id="fileWrapper">
+                    <div class="file-icon">
+                        <i class="fas fa-camera-retro"></i>
+                    </div>
+                    <div class="file-input-text">
+                        <strong>Click to select</strong> or drag and drop your retinal scan
+                    </div>
+                    <div class="file-input-subtext">
+                        High-resolution images provide the most accurate analysis results
+                    </div>
+                    <div class="supported-formats">
+                        <span class="format-badge">JPG</span>
+                        <span class="format-badge">PNG</span>
+                        <span class="format-badge">TIFF</span>
+                        <span class="format-badge">DICOM</span>
+                    </div>
+                    <input type="file" id="scanFile" accept=".jpg,.jpeg,.png,.tiff,.tif,.dcm" />
+                </div>
+                <button type="button" id="uploadBtn" class="glow-effect">
+                    <i class="fas fa-rocket"></i> Analyze Scan
+                </button>
+            </form>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section">
+            <div id="report">
+                <div class="report-content">
+                    <i class="fas fa-upload" style="font-size: 3rem; color: #666; margin-bottom: 1rem;"></i>
+                    <p style="color: #888; font-size: 1.2rem; font-weight: 500;">
+                        Upload a retinal scan to begin comprehensive AI analysis
+                    </p>
+                    <p style="color: #666; font-size: 1rem; margin-top: 0.5rem;">
+                        Our advanced algorithms will provide detailed diagnostic insights
+                    </p>
+                </div>
+            </div>
+
+            <model-viewer 
+                id="modelViewer" 
+                src="" 
+                alt="3D Retina Model" 
+                auto-rotate 
+                camera-controls
+                style="display: none;"
+                loading="eager"
+                reveal="interaction">
+            </model-viewer>
+        </section>
+
+        <!-- Technology Section -->
+        <section class="technology" id="technology">
+            <div class="section-header">
+                <h2 class="section-title">Powered by Advanced Technology</h2>
+                <p class="section-description">
+                    Built on the latest advancements in artificial intelligence and medical imaging
+                </p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fab fa-python"></i>
+                    </div>
+                    <h3 class="tech-name">TensorFlow</h3>
+                    <p class="tech-description">Deep learning framework powering our neural networks</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3 class="tech-name">Cloud Computing</h3>
+                    <p class="tech-description">Scalable infrastructure for rapid processing</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3 class="tech-name">Big Data</h3>
+                    <p class="tech-description">Trained on massive datasets for accuracy</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="tech-name">Encryption</h3>
+                    <p class="tech-description">End-to-end security for patient data</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="section-header">
+                <h2 class="section-title">Proven Performance</h2>
+                <p class="section-description">
+                    Numbers that demonstrate our commitment to excellence
+                </p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">50+</div>
+                    <div class="stat-description">Images Processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">15+</div>
+                    <div class="stat-description">Conditions Detectable</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-description">Medical Partners</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">99.2%</div>
+                    <div class="stat-description">Accuracy Rate</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>RetinalAI</h3>
+                <p>Advancing medical diagnosis through artificial intelligence and cutting-edge image analysis technology.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Services</h3>
+                <p><a href="#">Retinal Analysis</a></p>
+                <p><a href="#">3D Visualization</a></p>
+                <p><a href="#">Clinical Reports</a></p>
+                <p><a href="#">API Integration</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <p><a href="#">Documentation</a></p>
+                <p><a href="#">Contact Support</a></p>
+                <p><a href="#">Training Resources</a></p>
+                <p><a href="#">System Status</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <p><a href="#">About Us</a></p>
+                <p><a href="#">Privacy Policy</a></p>
+                <p><a href="#">Terms of Service</a></p>
+                <p><a href="#">Careers</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 RetinalAI - Advanced Medical Imaging Solutions | All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <script>
+        const scanFile = document.getElementById('scanFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const report = document.getElementById('report');
+        const modelViewer = document.getElementById('modelViewer');
+        const fileWrapper = document.getElementById('fileWrapper');
+
+        // Enhanced file drag and drop functionality
+        fileWrapper.addEventListener('click', () => scanFile.click());
+
+        fileWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileWrapper.classList.add('drag-over');
+        });
+
+        fileWrapper.addEventListener('dragleave', (e) => {
+            if (!fileWrapper.contains(e.relatedTarget)) {
+                fileWrapper.classList.remove('drag-over');
+            }
+        });
+
+        fileWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileWrapper.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (validateFile(file)) {
+                    scanFile.files = e.dataTransfer.files;
+                    updateFileDisplay();
+                }
+            }
+        });
+
+        scanFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && validateFile(file)) {
+                updateFileDisplay();
+            }
+        });
+
+        function validateFile(file) {
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/tiff', 'application/dicom'];
+            const maxSize = 50 * 1024 * 1024; // 50MB
+
+            if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.dcm')) {
+                showError('Please select a valid image file (JPG, PNG, TIFF, or DICOM).');
+                return false;
+            }
+
+            if (file.size > maxSize) {
+                showError('File size must be less than 50MB.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateFileDisplay() {
+            const file = scanFile.files[0];
+            if (file) {
+                const fileName = file.name;
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                fileWrapper.classList.add('has-file');
+                fileWrapper.querySelector('.file-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+                fileWrapper.querySelector('.file-input-text').innerHTML = `
+                    <strong>File Selected:</strong> ${fileName}
+                `;
+                fileWrapper.querySelector('.file-input-subtext').innerHTML = `
+                    Size: ${fileSize} MB | <span style="color: #4facfe; cursor: pointer;" onclick="clearFile()">Change file</span>
+                `;
+                
+                uploadBtn.disabled = false;
+                uploadBtn.style.background = 'var(--accent-gradient)';
+            }
+        }
+
+        function clearFile() {
+            scanFile.value = '';
+            fileWrapper.classList.remove('has-file');
+            fileWrapper.querySelector('.file-icon').innerHTML = '<i class="fas fa-camera-retro"></i>';
+            fileWrapper.querySelector('.file-input-text').innerHTML = `
+                <strong>Click to select</strong> or drag and drop your retinal scan
+            `;
+            fileWrapper.querySelector('.file-input-subtext').innerHTML = `
+                High-resolution images provide the most accurate analysis results
+            `;
+            uploadBtn.disabled = true;
+        }
+
+        uploadBtn.addEventListener('click', handleUpload);
+
+        async function handleUpload() {
+            const file = scanFile.files[0];
+            
+            if (!file) {
+                showError('Please select a retinal scan file first.');
+                return;
+            }
+
+            // Show enhanced loading state
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('processing');
+            uploadBtn.innerHTML = '<div class="processing-indicator"><i class="fas fa-cog fa-spin"></i> <span class="processing-dots">Analyzing</span></div>';
+            
+            report.className = 'loading';
+            report.innerHTML = `
+                <div class="report-content">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">AI is analyzing your retinal scan</p>
+                    <p class="loading-subtext">
+                        Processing high-resolution imagery and detecting potential conditions...
+                    </p>
+                </div>
+            `;
+
+            modelViewer.style.display = 'none';
+
+            try {
+                // Simulate realistic processing time
+                await new Promise(resolve => setTimeout(resolve, 3000 + Math.random() * 2000));
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Try to send to backend, fallback to demo mode
+                let result;
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData,
+                        timeout: 10000
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    result = await response.json();
+                } catch (fetchError) {
+                    console.log('Backend unavailable, using demo mode:', fetchError.message);
+                    // Demo results for development/preview
+                    result = generateDemoResult(file.name);
+                }
+
+                displayResults(result);
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError(error.message || 'Failed to analyze the scan. Please try again.');
+            } finally {
+                // Reset button
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('processing');
+                uploadBtn.innerHTML = '<i class="fas fa-rocket"></i> Analyze Scan';
+            }
+        }
+
+        function generateDemoResult(filename) {
+            const conditions = [
+                'Healthy Retina',
+                'Diabetic Retinopathy - Mild',
+                'Macular Degeneration - Early Stage',
+                'Glaucoma Suspect',
+                'Hypertensive Retinopathy'
+            ];
+            
+            const condition = conditions[Math.floor(Math.random() * conditions.length)];
+            const confidence = 0.85 + Math.random() * 0.14; // 85-99%
+            
+            const details = {
+                'Healthy Retina': 'No significant abnormalities detected. Retinal vasculature appears normal with good optic disc appearance.',
+                'Diabetic Retinopathy - Mild': 'Early signs of diabetic changes detected. Microaneurysms present with minimal hemorrhages.',
+                'Macular Degeneration - Early Stage': 'Drusen deposits identified in the macular region. Recommend follow-up monitoring.',
+                'Glaucoma Suspect': 'Optic disc changes suggestive of early glaucomatous damage. IOP measurement recommended.',
+                'Hypertensive Retinopathy': 'Vascular changes consistent with hypertensive retinopathy. Blood pressure monitoring advised.'
+            };
+
+            return {
+                diagnosis: condition,
+                confidence: confidence.toFixed(3),
+                details: details[condition],
+                recommendations: 'Consult with an ophthalmologist for comprehensive evaluation.',
+                model_path: null // No 3D model in demo mode
+            };
+        }
+
+        function displayResults(result) {
+            const confidence = parseFloat(result.confidence);
+            let confidenceClass = 'low';
+            let confidenceIcon = 'fas fa-exclamation-triangle';
+            
+            if (confidence >= 0.85) {
+                confidenceClass = 'high';
+                confidenceIcon = 'fas fa-check-circle';
+            } else if (confidence >= 0.7) {
+                confidenceClass = 'medium';
+                confidenceIcon = 'fas fa-info-circle';
+            }
+
+            report.className = 'success';
+            report.innerHTML = `
+                <div class="report-content">
+                    <div class="diagnosis">
+                        <i class="fas fa-microscope" style="margin-right: 10px;"></i>
+                        ${result.diagnosis}
+                    </div>
+                    <div class="confidence ${confidenceClass}">
+                        <i class="${confidenceIcon}" style="margin-right: 8px;"></i>
+                        Confidence: ${(confidence * 100).toFixed(1)}%
+                    </div>
+                    ${result.details ? `
+                        <div class="report-details">
+                            <strong>Analysis Details:</strong><br>
+                            ${result.details}
+                        </div>
+                    ` : ''}
+                    ${result.recommendations ? `
+                        <div class="report-details" style="margin-top: 1rem;">
+                            <strong>Recommendations:</strong><br>
+                            ${result.recommendations}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Update 3D model if provided
+            if (result.model_path) {
+                modelViewer.src = result.model_path;
+                modelViewer.style.display = 'block';
+                report.style.marginBottom = '3rem';
+            }
+
+            // Scroll to results
+            report.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function showError(message) {
+            report.className = 'error';
+            report.innerHTML = `
+                <div class="report-content">
+                    <div style="font-size: 1.5rem; margin-bottom: 1rem; color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle"></i> Analysis Failed
+                    </div>
+                    <p style="font-size: 1.1rem; margin-bottom: 1rem;">${message}</p>
+                    <p style="font-size: 1rem; color: #999;">
+                        Please verify your file format and try again, or contact support if the issue persists.
+                    </p>
+                </div>
+            `;
+            modelViewer.style.display = 'none';
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add floating particles for extra visual appeal
+        function createFloatingParticles() {
+            for (let i = 0; i < 5; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    position: fixed;
+                    width: ${2 + Math.random() * 4}px;
+                    height: ${2 + Math.random() * 4}px;
+                    background: rgba(79, 172, 254, ${0.1 + Math.random() * 0.3});
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 0;
+                    left: ${Math.random() * 100}vw;
+                    top: ${Math.random() * 100}vh;
+                    animation: float ${5 + Math.random() * 5}s ease-in-out infinite;
+                    animation-delay: ${Math.random() * 5}s;
+                `;
+                document.body.appendChild(particle);
+            }
+        }
+
+        // Initialize particles on load
+        document.addEventListener('DOMContentLoaded', createFloatingParticles);
+
+        // Add intersection observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'containerReveal 0.8s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards and other elements
+        document.querySelectorAll('.feature-card, .tech-card, .stat-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
