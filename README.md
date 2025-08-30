@@ -1,4 +1,4 @@
-# AI-Powered Retinal Disease 3D Visualizer - Backend
+# AI-Powered Retinal Disease 3D Visualizer 
 
 An AI-powered retinal scan analysis system that generates a medical report and displays a realistic 3D retina model for interactive exploration.
 This demo uses a pre-built .glb 3D model as output visualization.
